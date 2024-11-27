@@ -9,23 +9,29 @@ class EventHandler:
         self.running = True
 
     def receive_packets(self):
-        """
-        Continuously receive packets from the socket and add them to the game instance's queue.
-        """
+        buffer = ""
         while self.running:
             try:
-                data = self.connection.recv(1024).decode()
+                data = self.connection.recv(
+                    1024).decode()  # Read incoming data
                 if data:
-                    packet = json.loads(data)
-                    # Add the packet to the IGameInstance queue
-                    self.game_instance.packet_queue.put(packet)
-            except Exception as e:
-                print(f"Error receiving packets: {e}")
+                    buffer += data
+                    while "\n" in buffer:
+                        packet_data, buffer = buffer.split("\n", 1)
+                        try:
+                            packet = json.loads(packet_data)
+                            self.game_instance.packet_queue.put(packet)
+                        except json.JSONDecodeError as e:
+                            print(f"Error decoding packet: {e}")
+            except (ConnectionResetError, OSError):
+                print("Connection lost.")
+                self.connection = None
                 self.running = False
+                break
 
     def start(self):
-        """
-        Run the receive_packets method in a separate thread.
-        """
         thread = Thread(target=self.receive_packets)
         thread.start()
+
+    def stop(self):
+        self.running = False

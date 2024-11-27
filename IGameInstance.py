@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 from queue import Queue
 from enum import Enum
 import socket
+import json
 
 
 class PacketType(Enum):
@@ -14,7 +15,7 @@ class PacketType(Enum):
 
 
 class IGameInstance(ABC):
-    def __init__(self, role, host="localhost", port=11342):
+    def __init__(self, role, host="localhost", port=11341):
         self.role = role  # "server" or "client"
         self.host = host
         self.port = port
@@ -26,31 +27,46 @@ class IGameInstance(ABC):
         self.connection = None
         self.gui_callback = None  # Optional callback for GUI updates
         self.id = None
+        self.isOver = False
 
     def set_gui_callback(self, callback):
-        """
-        Set the callback function for GUI updates.
-        """
+
         self.gui_callback = callback
 
     @abstractmethod
     def initialize(self):
-        """Initialize the instance (connect or start listening)."""
         pass
 
-    @abstractmethod
     def send_packet(self, packet):
-        """Send a packet to the peer."""
-        pass
+
+        try:
+            # Append newline as a delimiter
+            message = json.dumps(packet) + "\n"
+            self.connection.sendall(message.encode())
+        except Exception as e:
+            print(f"Error sending packet: {e}")
 
     @abstractmethod
     def process_packet(self, packet):
-        """Process a received packet."""
         pass
 
     def run(self):
-        """Continuously process packets from the queue."""
         while self.running:
             if not self.packet_queue.empty():
                 packet = self.packet_queue.get()
                 self.process_packet(packet)
+
+    def check_win(self, player):
+        win_positions = [
+            [0, 1, 2], [3, 4, 5], [6, 7, 8],  # Rows
+            [0, 3, 6], [1, 4, 7], [2, 5, 8],  # Columns
+            [0, 4, 8], [2, 4, 6]              # Diagonals
+        ]
+        for positions in win_positions:
+            # Check if all positions are occupied by the same player and not " "
+            if all(self.board[pos] == player for pos in positions) and player != " ":
+                return True
+        return False
+
+    def stop(self):
+        self.running = False
