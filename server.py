@@ -38,6 +38,7 @@ class Server(IGameInstance):
         self.packet_queue.queue.clear()  # Clear any pending packets
         self.send_packet({"type": PacketType.RESET.value})
         self.isOver = False  # Reset game over flag
+        self.decide_first_player()
 
     def process_packet(self, packet):
         packet_type = packet.get("type")

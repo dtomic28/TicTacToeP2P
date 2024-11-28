@@ -30,9 +30,9 @@ class Client(IGameInstance):
             print("Game reset requested by the server.")
             self.reset_game()  # Call the reset logic
         elif packet_type == PacketType.GAME_WIN.value:
-            player = packet.get("player")
+            result = packet.get("result")
             self.gui_callback(
-                {"type": "END", "result": "Player " + player + " Wins!"})
+                {"type": "END", "result": result})
 
     def reset_game(self):
         self.board = [" "] * 9  # Clear the board

@@ -157,6 +157,7 @@ class TicTacToeGUI:
                   font=("Arial", 14)).pack(pady=10)
 
     def make_move(self, index):
+        print("Click registered")
         if self.game_instance.current_player == self.game_instance.id:  # Check if it's the player's turn
             self.game_instance.play_turn(index)
         else:
