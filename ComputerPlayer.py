@@ -88,11 +88,21 @@ class ComputerPlayer(IGameInstance):
         else:
             print("No moves available! Game over.")
 
-    def find_best_move(self):
+    def checkIfFree(self):
         for i in range(9):
             if self.board[i] == " ":
                 return i
-        return -1  # No valid moves
+        return -1
+
+    def find_best_move(self):
+        isFree = self.checkIfFree()
+        if (isFree == -1):
+            return isFree
+
+        while (True):
+            r = random.randint(0, 8)
+            if (self.board[r] == ' '):
+                return r
 
     def check_win(self, player):
         win_positions = [
