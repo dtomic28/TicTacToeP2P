@@ -30,7 +30,6 @@ class IGameInstance(ABC):
         self.isOver = False
 
     def set_gui_callback(self, callback):
-
         self.gui_callback = callback
 
     @abstractmethod
